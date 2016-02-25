@@ -1,0 +1,22 @@
+{
+    "name": "hrgruri/ricca",
+    "description": "Slack Bot",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yuya Aratani",
+            "email": "hrgruri@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Hrgruri\\Ricca\\":"src"
+        }
+    },
+    "require": {
+        "php": ">=7.0.0",
+        "devristo/phpws" : "dev-master",
+        "coderstephen/slack-client": "^0.2.3",
+        "abraham/twitteroauth": "^0.6.2"
+    }
+}

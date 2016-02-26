@@ -2,21 +2,52 @@
 namespace Hrgruri\Ricca;
 
 use \Hrgruri\Ricca\{SlackAPI, TwitterAPI};
+use \Hrgruri\Ricca\CommandException;
 
 class RiccaCommand
 {
-    private $key;
-    private $twitter;
+    private $keys;
+    private $aliases;
+    private $flg;
 
-    public function __construct($key)
+    public function __construct($keys, $aliases)
     {
-        $this->key = $key;
-        $this->twitter = new \Hrgruri\Ricca\TwitterAPI($key->twitter);
+        $this->keys     = $keys;
+        $this->aliases  = $aliases;
+        $this->flg      = true;
     }
 
-    public function tw(string $opt)
+    public function fire(string $cmd, string $opt)
     {
-        $res = $this->twitter->post($opt);
-        return $res;
+        $result = null;
+        $cmd = lcfirst($cmd);
+        if ($cmd === 'start' || $cmd === 'stop') {
+            $this->$cmd();
+            $result = new \Hrgruri\Ricca\Response(true, 'OK.');
+        } else {
+            $class = '\\Hrgruri\\Ricca\\Command\\'.ucfirst($cmd);
+            if ($this->flg !== true) {
+                throw new LiteException('Ricca is OFF');
+            } elseif (!class_exists($class)) {
+                throw new CommandException("UNDEFINED COMMAND: {$cmd}");
+            }
+            if (property_exists($this->aliases, $cmd)) {
+                $key = property_exists($this->keys, $this->aliases->$cmd) ? $this->keys->{$this->aliases->$cmd} : null;
+            } else {
+                $key = null;
+            }
+            $result = (new $class)->run($opt, $key);
+        }
+        return $result;
+    }
+
+    public function start()
+    {
+        $this->flg = true;
+    }
+
+    public function stop()
+    {
+        $this->flg = false;
     }
 }

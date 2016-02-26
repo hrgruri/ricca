@@ -2,11 +2,12 @@
 namespace Hrgruri\Ricca;
 
 use \Hrgruri\Ricca\{SlackAPI, RiccaCommand};
+use \Hrgruri\Ricca\{LiteException, CommandException};
 
 class Ricca
 {
     private $slack;
-    private $keys;
+    private $token;
     private $root;
     private $allow;
     private $rc;
@@ -15,18 +16,21 @@ class Ricca
     public function __construct(string $dir)
     {
         $this->root     =   $dir;
-        $this->keys      =   json_decode(file_get_contents("{$this->root}/keys.json"));
-        $this->slack    =   new \Hrgruri\Ricca\SlackAPI($this->keys->slack);
+        $keys           =   json_decode(file_get_contents("{$this->root}/keys.json"));
+        $aliases        =   json_decode(file_get_contents(dirname(__FILE__).'/alias.json'));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
-        $this->rc       =   new RiccaCommand($this->keys);
+        $this->token    =   $keys->slack;
+        $this->slack    =   new \Hrgruri\Ricca\SlackAPI($this->token);
+        $this->rc       =   new RiccaCommand($keys, $aliases);
         $this->botName  =   $this->slack->getTokenUser();
+        $this->slack->postMsg("Ricca->run() : ".getmypid());
     }
 
     public function run()
     {
         $loop  = \React\EventLoop\Factory::create();
         $client = new \Slack\RealTimeClient($loop);
-        $client->setToken($this->keys->slack);
+        $client->setToken($this->token);
         $client->on('message', function ($data) use ($client) {
             $this->fire($data);
             // $client->disconnect();
@@ -41,39 +45,45 @@ class Ricca
 
     private function fire($data)
     {
-        $res = false;
+        $result = false;
         if ($this->botName === $data['user']) {
             return true;
         }
+        $user       =   $this->slack->getUserById($data['user']);
+        $channel    =   $this->slack->getChannelById($data['channel']);
+        if (!$this->isAllowUser($user)) {
+            return false;
+        }
         try {
-            $user       =   $this->slack->getUserById($data['user']);
-            $channel    =   $this->slack->getChannelById($data['channel']);
             $text       =   mb_convert_kana($data['text'], 'as');
-            if (!$this->isAllowUser($user)) {
-                throw new \Exception("{$user} is deny user", 1);
-            }
             // ALL CHANNELS
             if (preg_match('/^(\S*)(\s.*|)/', $text, $matched) === 1) {
-                $cmd = lcfirst($matched[1]);
-                if($cmd === '__construct') {
-                    throw new \Exception("cannot use this command (__construct)", 1);
-                }
-                if (is_callable(array($this->rc, $cmd))) {
-                    $res = $this->rc->$cmd(trim($matched[2]));
-                } else {
-                    throw new \Exception("undefined command", 1);
-                }
+                $cmd = $matched[1];
+                $res = $this->rc->fire($cmd, trim($matched[2]));
             } else {
-                throw new \Exception("Not matched", 1);
+                throw new CommandException("Not matched");
             }
-            if ($res === true) {
-                $this->response($cmd, $channel);
+            if ($res->flg === true) {
+                if(is_null($res->msg)) {
+                    $this->response(lcfirst($cmd), $channel);
+                } else {
+                    $this->slack->postMsg($res->msg, $channel);
+                }
+                $result = true;
+            } else {
+
             }
+        } catch (LiteException $e) {
+            $this->slack->postMsg($e->getDetail());
+            $result = false;
+        } catch (CommandException $e){
+            $this->slack->postMsg($e->getDetail());
+            $result = false;
         } catch (\Exception $e) {
-            // print $e->getMessage().PHP_EOL;
-            $res = false;
+            $this->slack->postMsg($e->getMessage());
+            $result = false;
         }
-        return $res;
+        return $result;
     }
 
     private function isAllowUser($name)

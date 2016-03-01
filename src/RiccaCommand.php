@@ -2,7 +2,7 @@
 namespace Hrgruri\Ricca;
 
 use \Hrgruri\Ricca\{SlackAPI, TwitterAPI};
-use \Hrgruri\Ricca\CommandException;
+use \Hrgruri\Ricca\Exception\{LiteException,CommandException};
 
 class RiccaCommand
 {

@@ -1,8 +1,9 @@
 <?php
 namespace Hrgruri\Ricca;
 
-use \Hrgruri\Ricca\{SlackAPI, RiccaCommand};
-use \Hrgruri\Ricca\{LiteException, CommandException};
+use \Hrgruri\Ricca\API\SlackAPI;
+use \Hrgruri\Ricca\RiccaCommand;
+use \Hrgruri\Ricca\Exception\{LiteException, CommandException};
 
 class Ricca
 {
@@ -20,7 +21,7 @@ class Ricca
         $aliases        =   json_decode(file_get_contents(dirname(__FILE__).'/alias.json'));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
         $this->token    =   $keys->slack;
-        $this->slack    =   new \Hrgruri\Ricca\SlackAPI($this->token);
+        $this->slack    =   new SlackAPI($this->token);
         $this->rc       =   new RiccaCommand($keys, $aliases);
         $this->botName  =   $this->slack->getTokenUser();
         $this->slack->postMsg("Ricca->run() : ".getmypid());

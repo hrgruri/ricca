@@ -1,5 +1,5 @@
 <?php
-namespace Hrgruri\Ricca;
+namespace Hrgruri\Ricca\API;
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 

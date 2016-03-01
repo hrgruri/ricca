@@ -1,7 +1,7 @@
 <?php
 namespace Hrgruri\Ricca\Command;
 
-use \Hrgruri\Ricca\CommandException;
+use \Hrgruri\Ricca\Exception\CommandException;
 
 class Test implements \Hrgruri\Ricca\CommandInterface
 {

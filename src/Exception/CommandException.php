@@ -1,5 +1,5 @@
 <?php
-namespace Hrgruri\Ricca;
+namespace Hrgruri\Ricca\Exception;
 
 class CommandException extends \Exception
 {

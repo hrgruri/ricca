@@ -3,7 +3,7 @@ namespace Hrgruri\Ricca;
 
 use \Hrgruri\Ricca\API\SlackAPI;
 use \Hrgruri\Ricca\RiccaCommand;
-use \Hrgruri\Ricca\Exception\{LiteException, CommandException};
+use \Hrgruri\Ricca\Exception\{LiteException, CommandException, CronException};
 
 class Ricca
 {
@@ -21,14 +21,14 @@ class Ricca
         $aliases        =   json_decode(file_get_contents(dirname(__FILE__).'/alias.json'));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
         $this->token    =   $keys->slack;
-        $this->slack    =   new SlackAPI($this->token);
-        $this->rc       =   new RiccaCommand($keys, $aliases);
-        $this->botName  =   $this->slack->getTokenUser();
-        $this->slack->postMsg("Ricca->run() : ".getmypid());
     }
 
     public function run()
     {
+        $this->slack    =   new SlackAPI($this->token);
+        $this->rc       =   new RiccaCommand($keys, $aliases);
+        $this->botName  =   $this->slack->getTokenUser();
+        $this->slack->postMsg("Ricca->run() : ".getmypid());
         $loop  = \React\EventLoop\Factory::create();
         $client = new \Slack\RealTimeClient($loop);
         $client->setToken($this->token);
@@ -100,6 +100,34 @@ class Ricca
             $this->slack->postMsg($text, $channel);
         } else {
             $this->slack->postMsg('undefined response', $channel);
+        }
+    }
+
+    public function cron()
+    {
+        if (!file_exists("{$this->root}/cron.json")) {
+            throw new CronException("cron.json is not exists");
+        }
+        $now = explode(' ', date('i G j n w'));
+        for ($i = 0; $i < count($now); $i++) {
+            $now[$i] = (int)$now[$i];
+        }
+        $jobs  = json_decode(file_get_contents("{$this->root}/cron.json"));
+        $queue = array();
+        foreach ($jobs as $tmp) {
+            $job = new \Hrgruri\Ricca\Job($tmp, $now);
+            if (!$job->checkJob()) {
+                throw new CronException();
+            }
+            if ($job->checkTime()) {
+                $queue[] = $job->getMessage();
+            }
+        }
+        if(count($queue) > 0 ) {
+            $slack = new SlackAPI($this->token);
+            foreach ($queue as $message) {
+                $slack->postMsg($message);
+            }
         }
     }
 }

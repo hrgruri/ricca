@@ -16,10 +16,13 @@ class Ricca
 
     public function __construct(string $dir)
     {
-        $this->root     =   $dir;
+        $this->root     =   rtrim($dir, '/');
         $keys           =   json_decode(file_get_contents("{$this->root}/keys.json"));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
         $this->token    =   $keys->slack;
+            if (!file_exists(dirname(__FILE__).'/data/user')) {
+            mkdir(dirname(__FILE__).'/data/user', 0700);
+        }
     }
 
     public function run()
@@ -76,10 +79,10 @@ class Ricca
 
             }
         } catch (LiteException $e) {
-            $this->slack->postMsg($e->getDetail());
+            // $this->slack->postMsg($e->getDetail());
             $result = false;
         } catch (CommandException $e){
-            $this->slack->postMsg($e->getDetail());
+            // $this->slack->postMsg($e->getDetail());
             $result = false;
         } catch (\Exception $e) {
             $this->slack->postMsg($e->getMessage());

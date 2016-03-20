@@ -9,19 +9,21 @@ class RiccaCommand
     private $keys;
     private $using;
     private $flg;
+    private $dir;
 
     public function __construct($keys, $using)
     {
-        $this->keys     = $keys;
-        $this->using  = $using;
-        $this->flg      = true;
+        $this->keys     =   $keys;
+        $this->using    =   $using;
+        $this->dir      =   dirname(__FILE__).'/data';
+        $this->flg      =   true;
     }
 
     public function fire(string $cmd, string $opt)
     {
         $result = null;
-        $cmd = lcfirst($cmd);
-        if ($cmd === 'start' || $cmd === 'stop') {
+        $cmd    = mb_strtolower($cmd);
+        if ($cmd !== '__construct' && $cmd !== 'fire' && method_exists($this,$cmd)) {
             $this->$cmd();
             $result = new \Hrgruri\Ricca\Response(true, 'OK.');
         } else {
@@ -36,7 +38,7 @@ class RiccaCommand
             } else {
                 $key = null;
             }
-            $result = (new $class)->run($opt, $key);
+            $result = (new $class("{$cmd}.json"))->run($opt, $key);
         }
         return $result;
     }

@@ -3,7 +3,7 @@ namespace Hrgruri\Ricca\Command;
 
 use \Hrgruri\Ricca\Exception\CommandException;
 
-class Tw implements \Hrgruri\Ricca\CommandInterface
+class Tw extends \Hrgruri\Ricca\Command
 {
     public function run($opt, $key)
     {

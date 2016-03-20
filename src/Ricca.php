@@ -18,15 +18,16 @@ class Ricca
     {
         $this->root     =   $dir;
         $keys           =   json_decode(file_get_contents("{$this->root}/keys.json"));
-        $aliases        =   json_decode(file_get_contents(dirname(__FILE__).'/alias.json'));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
         $this->token    =   $keys->slack;
     }
 
     public function run()
     {
+        $keys           =   json_decode(file_get_contents("{$this->root}/keys.json"));
+        $using          =   json_decode(file_get_contents(dirname(__FILE__).'/using.json'));
         $this->slack    =   new SlackAPI($this->token);
-        $this->rc       =   new RiccaCommand($keys, $aliases);
+        $this->rc       =   new RiccaCommand($keys, $using);
         $this->botName  =   $this->slack->getTokenUser();
         $this->slack->postMsg("Ricca->run() : ".getmypid());
         $loop  = \React\EventLoop\Factory::create();

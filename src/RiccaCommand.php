@@ -7,13 +7,13 @@ use \Hrgruri\Ricca\Exception\{LiteException,CommandException};
 class RiccaCommand
 {
     private $keys;
-    private $aliases;
+    private $using;
     private $flg;
 
-    public function __construct($keys, $aliases)
+    public function __construct($keys, $using)
     {
         $this->keys     = $keys;
-        $this->aliases  = $aliases;
+        $this->using  = $using;
         $this->flg      = true;
     }
 
@@ -31,8 +31,8 @@ class RiccaCommand
             } elseif (!class_exists($class)) {
                 throw new CommandException("UNDEFINED COMMAND: {$cmd}");
             }
-            if (property_exists($this->aliases, $cmd)) {
-                $key = property_exists($this->keys, $this->aliases->$cmd) ? $this->keys->{$this->aliases->$cmd} : null;
+            if (property_exists($this->using, $cmd)) {
+                $key = property_exists($this->keys, $this->using->$cmd) ? $this->keys->{$this->using->$cmd} : null;
             } else {
                 $key = null;
             }

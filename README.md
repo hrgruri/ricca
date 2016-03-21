@@ -1,9 +1,6 @@
 # Ricca is Slack Bot
 ## Overview
 If you send a specific message, Ricca(Bot) will do action instead of you.
-## Command
-### tw (tweet command)
-tw Hello World
 ## Setting
 ### Config
 config/allow.jsno
@@ -24,15 +21,6 @@ config/keys.json
         "oauth_token"       :"OAUTH_TOKEN",
         "oauth_token_secret":"OAUTH_TOKEN_SECRET"
     }
-}
-```
-config/response.json
-```json
-{
-    "tw":[
-        "it'done",
-        "ok"
-    ]
 }
 ```
 ## Usage

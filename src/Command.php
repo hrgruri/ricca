@@ -6,6 +6,12 @@ abstract class Command
     private $file;
     protected $data;
     protected $user_data;
+
+    /**
+    *   @param  string $opt: message
+    *   @param  stdClass | string $key
+    *   @return null | string | \Hrgruri\Ricca\Response
+    */
     abstract public function run($opt, $key);
 
     public function __construct($file)

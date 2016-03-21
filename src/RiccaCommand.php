@@ -19,19 +19,23 @@ class RiccaCommand
         $this->flg      =   true;
     }
 
+    /**
+    *   @param string $cmd: command
+    *   @param string $opt: message
+    *   @return null | string | int
+    */
     public function fire(string $cmd, string $opt)
     {
         $result = null;
         $cmd    = mb_strtolower($cmd);
         if ($cmd !== '__construct' && $cmd !== 'fire' && method_exists($this,$cmd)) {
-            $this->$cmd();
-            $result = new \Hrgruri\Ricca\Response(true, 'OK.');
+            $result = $this->$cmd();
         } else {
             $class = '\\Hrgruri\\Ricca\\Command\\'.ucfirst($cmd);
             if ($this->flg !== true) {
                 throw new LiteException('Ricca is OFF');
             } elseif (!class_exists($class)) {
-                throw new CommandException("UNDEFINED COMMAND: {$cmd}");
+                throw new LiteException("UNDEFINED COMMAND: {$cmd}");
             }
             if (property_exists($this->using, $cmd)) {
                 $key = property_exists($this->keys, $this->using->$cmd) ? $this->keys->{$this->using->$cmd} : null;

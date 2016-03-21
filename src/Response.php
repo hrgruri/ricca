@@ -3,18 +3,13 @@ namespace Hrgruri\Ricca;
 
 class Response
 {
-    public $flg;
-    public $msg;
     public $code;
 
-    public function __construct(bool $flg, string $msg = null, int $code = null)
+    /**
+    *   @param string $code: response code
+    */
+    public function __construct(string $code)
     {
-        $this->flg = $flg;
-        if (is_string($msg)) {
-            $this->msg = $msg;
-        } else {
-            $this->msg = null;
-        }
-        $this->code = $code ?? 0;
+        $this->code = $code;
     }
 }

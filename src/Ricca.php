@@ -52,7 +52,7 @@ class Ricca
     {
         $result = false;
         if ($this->botName === $data['user']) {
-            return true;
+            return false;
         }
         $user       =   $this->slack->getUserById($data['user']);
         $channel    =   $this->slack->getChannelById($data['channel']);
@@ -66,23 +66,18 @@ class Ricca
                 $cmd = $matched[1];
                 $res = $this->rc->fire($cmd, trim($matched[2]));
             } else {
-                throw new CommandException("Not matched");
+                throw new LiteException("Not matched");
             }
-            if ($res->flg === true) {
-                if(is_null($res->msg)) {
-                    $this->response(lcfirst($cmd), $channel);
-                } else {
-                    $this->slack->postMsg($res->msg, $channel);
-                }
-                $result = true;
-            } else {
-
+            if(is_string($res)) {
+                $this->slack->postMsg($res, $channel);
+            } elseif($res instanceof \Hrgruri\Ricca\Response) {
+                $this->response(lcfirst($cmd), $res->code, $channel);
             }
         } catch (LiteException $e) {
             // $this->slack->postMsg($e->getDetail());
             $result = false;
         } catch (CommandException $e){
-            // $this->slack->postMsg($e->getDetail());
+            $this->slack->postMsg($e->getDetail());
             $result = false;
         } catch (\Exception $e) {
             $this->slack->postMsg($e->getMessage());
@@ -91,20 +86,42 @@ class Ricca
         return $result;
     }
 
-    private function isAllowUser($name)
+    private function isAllowUser(string $name)
     {
         return in_array($name, $this->allow->slack);
     }
 
-    private function response(string $cmd, string $channel)
+    private function response(string $cmd, string $code, string $channel)
     {
-        $data = json_decode(file_get_contents("{$this->root}/response.json"));
-        if (isset($data->$cmd)) {
-            $text = $data->$cmd[array_rand($data->$cmd)];
-            $this->slack->postMsg($text, $channel);
-        } else {
-            $this->slack->postMsg('undefined response', $channel);
+        if (is_null($text = $this->readUserResponse($cmd, $code))) {
+            $text = $this->readDefinedResponse($cmd, $code);
         }
+        if (is_null($text)) {
+            throw new CommandException("Undefined Response");
+        } else {
+            $this->slack->postMsg($text, $channel);
+        }
+    }
+
+    private function readUserResponse(string $cmd, string $code) {
+        if (file_exists("{$this->root}/response.json")) {
+            $data = json_decode(file_get_contents("{$this->root}/response.json"));
+            if (isset($data->{$cmd}->{$code})) {
+                $text = $data->{$cmd}->{$code}[array_rand($data->{$cmd}->{$code})];
+            }
+        }
+        return isset($text) ? $text : null;
+    }
+
+    private function readDefinedResponse(string $cmd, string $code) {
+        if (file_exists(dirname(__FILE__)."/data/response/{$cmd}.json")) {
+            $data = json_decode(file_get_contents(dirname(__FILE__)."/data/response/{$cmd}.json"));
+            // print_r($data);
+            if (isset($data->{$code})) {
+                $text = $data->{$code}[array_rand($data->{$code})];
+            }
+        }
+        return isset($text) ? $text : null;
     }
 
     public function cron()

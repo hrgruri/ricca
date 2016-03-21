@@ -7,6 +7,6 @@ class Test extends \Hrgruri\Ricca\Command
 {
     public function run($opt, $key)
     {
-        return new \Hrgruri\Ricca\Response(true, $opt);
+        return new \Hrgruri\Ricca\Response($opt);
     }
 }

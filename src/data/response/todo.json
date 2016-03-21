@@ -1,0 +1,18 @@
+{
+    "add": [
+        "add task"
+    ],
+    "clear": [
+        "delete all task",
+        "clear task list"
+    ],
+    "del": [
+        "delete task"
+    ],
+    "undel": [
+        "cannot delete task"
+    ],
+    "empty": [
+        "task list is empty"
+    ]
+}

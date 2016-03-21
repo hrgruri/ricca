@@ -24,6 +24,6 @@ abstract class Command
 
     protected function updateJson()
     {
-        file_put_contents(dirname(__FILE__)."/data/user/{$this->file}", $this->user_data, JSON_PRETTY_PRINT);
+        file_put_contents(dirname(__FILE__)."/data/user/{$this->file}", json_encode($this->user_data, JSON_PRETTY_PRINT));
     }
 }

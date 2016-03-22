@@ -23,14 +23,13 @@ class Todo extends \Hrgruri\Ricca\Command
     private function addTodo($opt)
     {
         $this->user_data[] = $opt;
-        $this->updateJson();
+        $this->updateUserData();
         return new Response('add');
     }
 
     private function clearTodo($opt)
     {
-        $this->user_data = null;
-        $this->updateJson();
+        $this->clearUserData();
         return new Response('clear');
     }
 
@@ -44,7 +43,7 @@ class Todo extends \Hrgruri\Ricca\Command
                 if ($i === $opt) {
                     unset($this->user_data[$i]);
                     $this->user_data = array_values($this->user_data);
-                    $this->updateJson();
+                    $this->updateUserData();
                     $result = new Response('del');
                 }
                 $i++;

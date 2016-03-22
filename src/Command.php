@@ -10,7 +10,7 @@ abstract class Command
     /**
     *   @param  string $opt: message
     *   @param  stdClass | string $key
-    *   @return null | string | \Hrgruri\Ricca\Response
+    *   @return null | string | \Hrgruri\Ricca\Response getenv("HOME")."/.ricca"
     */
     abstract public function run($opt, $key);
 
@@ -19,11 +19,20 @@ abstract class Command
         $dir        = dirname(__FILE__).'/data';
         $this->file = $file;
         $this->data         = (file_exists("{$dir}/command/{$file}") ? json_decode(file_get_contents("{$dir}/command/{$file}")) : null);
-        $this->user_data    = (file_exists("{$dir}/user/{$file}") ? json_decode(file_get_contents("{$dir}/user/{$file}")) : null);
+        $this->user_data    = (file_exists(getenv("HOME")."/.ricca/data/{$this->file}") ?
+            json_decode(file_get_contents(getenv("HOME")."/.ricca/data/{$this->file}")) : null);
     }
 
-    protected function updateJson()
+    protected function updateUserData()
     {
-        file_put_contents(dirname(__FILE__)."/data/user/{$this->file}", json_encode($this->user_data, JSON_PRETTY_PRINT));
+        file_put_contents(getenv("HOME")."/.ricca/data/{$this->file}", json_encode($this->user_data, JSON_PRETTY_PRINT));
+    }
+
+    protected function clearUserData()
+    {
+        $this->user_data = null;
+        if (file_exists(getenv("HOME")."/.ricca/data/{$this->file}")) {
+            unlink(getenv("HOME")."/.ricca/data/{$this->file}");
+        }
     }
 }

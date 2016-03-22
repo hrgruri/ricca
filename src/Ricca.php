@@ -20,8 +20,8 @@ class Ricca
         $keys           =   json_decode(file_get_contents("{$this->root}/keys.json"));
         $this->allow    =   json_decode(file_get_contents("{$this->root}/allow.json"));
         $this->token    =   $keys->slack;
-            if (!file_exists(dirname(__FILE__).'/data/user')) {
-            mkdir(dirname(__FILE__).'/data/user', 0700);
+        if (!file_exists(getenv("HOME")."/.ricca/data")) {
+            mkdir(getenv("HOME")."/.ricca/data", 0700, true);
         }
     }
 
@@ -104,10 +104,10 @@ class Ricca
     }
 
     private function readUserResponse(string $cmd, string $code) {
-        if (file_exists("{$this->root}/response.json")) {
-            $data = json_decode(file_get_contents("{$this->root}/response.json"));
-            if (isset($data->{$cmd}->{$code})) {
-                $text = $data->{$cmd}->{$code}[array_rand($data->{$cmd}->{$code})];
+        if (file_exists("{$this->root}/response/{$cmd}.json")) {
+            $data = json_decode(file_get_contents("{$this->root}/response/{$cmd}.json"));
+            if (isset($data->{$code})) {
+                $text = $data->{$code}[array_rand($data->{$code})];
             }
         }
         return isset($text) ? $text : null;
@@ -116,7 +116,6 @@ class Ricca
     private function readDefinedResponse(string $cmd, string $code) {
         if (file_exists(dirname(__FILE__)."/data/response/{$cmd}.json")) {
             $data = json_decode(file_get_contents(dirname(__FILE__)."/data/response/{$cmd}.json"));
-            // print_r($data);
             if (isset($data->{$code})) {
                 $text = $data->{$code}[array_rand($data->{$code})];
             }

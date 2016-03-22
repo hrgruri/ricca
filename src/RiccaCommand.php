@@ -50,10 +50,12 @@ class RiccaCommand
     public function start()
     {
         $this->flg = true;
+        return 'OK';
     }
 
     public function stop()
     {
         $this->flg = false;
+        return 'OK';
     }
 }

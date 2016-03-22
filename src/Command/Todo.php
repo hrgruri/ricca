@@ -41,10 +41,11 @@ class Todo extends \Hrgruri\Ricca\Command
             $i      = 1;
             foreach ($this->user_data as $val) {
                 if ($i === $opt) {
-                    unset($this->user_data[$i]);
+                    unset($this->user_data[$i-1]);
                     $this->user_data = array_values($this->user_data);
                     $this->updateUserData();
                     $result = new Response('del');
+                    break;
                 }
                 $i++;
             }

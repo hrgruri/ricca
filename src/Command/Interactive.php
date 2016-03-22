@@ -3,10 +3,10 @@ namespace Hrgruri\Ricca\Command;
 
 use \Hrgruri\Ricca\Exception\CommandException;
 
-class Test extends \Hrgruri\Ricca\Command
+class Interactive extends \Hrgruri\Ricca\Command
 {
     public function run($opt, $key)
     {
-        return new \Hrgruri\Ricca\Response\Response($opt);
+        return (new \Hrgruri\Ricca\Response\ResponsePlus)->message($opt, true);
     }
 }

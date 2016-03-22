@@ -2,7 +2,7 @@
 namespace Hrgruri\Ricca\Command;
 
 use \Hrgruri\Ricca\Exception\CommandException;
-use \Hrgruri\Ricca\Response;
+use \Hrgruri\Ricca\Response\Response;
 
 class Todo extends \Hrgruri\Ricca\Command
 {

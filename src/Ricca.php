@@ -13,6 +13,8 @@ class Ricca
     private $allow;
     private $rc;
     private $botName;
+    private $interactive_command    =   null;
+    private $interactive_flag       =   false;
 
     public function __construct(string $dir)
     {
@@ -61,17 +63,34 @@ class Ricca
         }
         try {
             $text       =   mb_convert_kana($data['text'], 'as');
-            // ALL CHANNELS
-            if (preg_match('/^(\S*)(\s.*|)/', $text, $matched) === 1) {
-                $cmd = $matched[1];
+            //TODO add preg
+            if ($text === 'quit') {
+                $res = $this->quit();
+            } elseif ($this->interactive_flag === true) {
+                $cmd = $this->interactive_command;
+                $res = $this->rc->fire($cmd, $text);
+            } elseif (preg_match('/^(\S*)(\s.*|)/', $text, $matched) === 1) {
+                $cmd = mb_strtolower($matched[1]);
                 $res = $this->rc->fire($cmd, trim($matched[2]));
             } else {
                 throw new LiteException("Not matched");
             }
+
+            // response
             if(is_string($res)) {
                 $this->slack->postMsg($res, $channel);
-            } elseif($res instanceof \Hrgruri\Ricca\Response) {
-                $this->response(lcfirst($cmd), $res->code, $channel);
+            } elseif ($res instanceof \Hrgruri\Ricca\Response\Response) {
+                $this->interactive_flag     = $res->interactive_flag;
+                $this->interactive_command  = $cmd;
+                $this->response($cmd, $res->code, $channel);
+            } elseif ($res instanceof \Hrgruri\Ricca\Response\ResponsePlus) {
+                $this->interactive_flag     = $res->interactive_flag;
+                $this->interactive_command  = $cmd;
+                if (!is_null($res->text) && $res->flag === true) {          //$res->text is response code
+                    $this->response($cmd, $res->text, $channel);
+                } elseif (!is_null($res->text) && $res->flag === false) {   //$res->text is response message
+                    $this->slack->postMsg($res->text);
+                }
             }
         } catch (LiteException $e) {
             // $this->slack->postMsg($e->getDetail());
@@ -149,5 +168,14 @@ class Ricca
                 $slack->postMsg($message);
             }
         }
+    }
+
+    /**
+     * quit interactive mode
+     */
+    private function quit()
+    {
+        $this->interactive_command  = null;
+        $this->interactive_flag     = false;
     }
 }

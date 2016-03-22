@@ -1,3 +1,5 @@
 {
-    "tw" : "twitter"
+    "tw" : [
+        "twitter"
+    ]
 }

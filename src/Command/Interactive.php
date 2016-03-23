@@ -2,11 +2,12 @@
 namespace Hrgruri\Ricca\Command;
 
 use \Hrgruri\Ricca\Exception\CommandException;
+use \Hrgruri\Ricca\Response;
 
 class Interactive extends \Hrgruri\Ricca\Command
 {
     public function run($opt, $key)
     {
-        return (new \Hrgruri\Ricca\Response\ResponsePlus)->message($opt, true);
+        return (new Response($opt, Response::MESSAGE, true));
     }
 }

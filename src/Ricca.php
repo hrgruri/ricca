@@ -2,7 +2,7 @@
 namespace Hrgruri\Ricca;
 
 use \Hrgruri\Ricca\API\SlackAPI;
-use \Hrgruri\Ricca\RiccaCommand;
+use \Hrgruri\Ricca\{RiccaCommand, Response};
 use \Hrgruri\Ricca\Exception\{LiteException, CommandException, CronException};
 
 class Ricca
@@ -65,31 +65,27 @@ class Ricca
             $text       =   mb_convert_kana($data['text'], 'as');
             //TODO add preg
             if ($text === 'quit') {
-                $res = $this->quit();
+                $response = $this->quit();
             } elseif ($this->interactive_flag === true) {
-                $cmd = $this->interactive_command;
-                $res = $this->rc->fire($cmd, $text);
+                $command    = $this->interactive_command;
+                $response   = $this->rc->fire($command, $text);
             } elseif (preg_match('/^(\S*)(\s.*|)/', $text, $matched) === 1) {
-                $cmd = mb_strtolower($matched[1]);
-                $res = $this->rc->fire($cmd, trim($matched[2]));
+                $command = mb_strtolower($matched[1]);
+                $response = $this->rc->fire($command, trim($matched[2]));
             } else {
                 throw new LiteException("Not matched");
             }
 
             // response
-            if(is_string($res)) {
-                $this->slack->postMsg($res, $channel);
-            } elseif ($res instanceof \Hrgruri\Ricca\Response\Response) {
-                $this->interactive_flag     = $res->interactive_flag;
-                $this->interactive_command  = $cmd;
-                $this->response($cmd, $res->code, $channel);
-            } elseif ($res instanceof \Hrgruri\Ricca\Response\ResponsePlus) {
-                $this->interactive_flag     = $res->interactive_flag;
-                $this->interactive_command  = $cmd;
-                if (!is_null($res->text) && $res->flag === true) {          //$res->text is response code
-                    $this->response($cmd, $res->text, $channel);
-                } elseif (!is_null($res->text) && $res->flag === false) {   //$res->text is response message
-                    $this->slack->postMsg($res->text);
+            if(is_string($response)) {
+                $this->slack->postMsg($response, $channel);
+            } elseif ($response instanceof Response) {
+                $this->interactive_flag     = $response->flag;
+                $this->interactive_command  = $command;
+                if (!is_null($response->text) && $response->type === Response::MESSAGE) {
+                    $this->slack->postMsg($response->text);
+                } elseif (!is_null($response->text) && $response->type === Response::CODE) {
+                    $this->response($command, $response->text, $channel);
                 }
             }
         } catch (LiteException $e) {
@@ -110,10 +106,10 @@ class Ricca
         return in_array($name, $this->allow->slack);
     }
 
-    private function response(string $cmd, string $code, string $channel)
+    private function response(string $command, string $code, string $channel)
     {
-        if (is_null($text = $this->readUserResponse($cmd, $code))) {
-            $text = $this->readDefinedResponse($cmd, $code);
+        if (is_null($text = $this->readUserResponse($command, $code))) {
+            $text = $this->readDefinedResponse($command, $code);
         }
         if (is_null($text)) {
             throw new CommandException("Undefined Response");
@@ -122,9 +118,9 @@ class Ricca
         }
     }
 
-    private function readUserResponse(string $cmd, string $code) {
-        if (file_exists("{$this->root}/response/{$cmd}.json")) {
-            $data = json_decode(file_get_contents("{$this->root}/response/{$cmd}.json"));
+    private function readUserResponse(string $command, string $code) {
+        if (file_exists("{$this->root}/response/{$command}.json")) {
+            $data = json_decode(file_get_contents("{$this->root}/response/{$command}.json"));
             if (isset($data->{$code})) {
                 $text = $data->{$code}[array_rand($data->{$code})];
             }
@@ -132,9 +128,9 @@ class Ricca
         return isset($text) ? $text : null;
     }
 
-    private function readDefinedResponse(string $cmd, string $code) {
-        if (file_exists(dirname(__FILE__)."/data/response/{$cmd}.json")) {
-            $data = json_decode(file_get_contents(dirname(__FILE__)."/data/response/{$cmd}.json"));
+    private function readDefinedResponse(string $command, string $code) {
+        if (file_exists(dirname(__FILE__)."/data/response/{$command}.json")) {
+            $data = json_decode(file_get_contents(dirname(__FILE__)."/data/response/{$command}.json"));
             if (isset($data->{$code})) {
                 $text = $data->{$code}[array_rand($data->{$code})];
             }

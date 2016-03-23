@@ -2,7 +2,7 @@
 namespace Hrgruri\Ricca\Command;
 
 use \Hrgruri\Ricca\Exception\CommandException;
-use \Hrgruri\Ricca\Response\Response;
+use \Hrgruri\Ricca\Response;
 
 class Todo extends \Hrgruri\Ricca\Command
 {
@@ -24,13 +24,13 @@ class Todo extends \Hrgruri\Ricca\Command
     {
         $this->user_data[] = $opt;
         $this->updateUserData();
-        return new Response('add');
+        return (new Response)->code('add');
     }
 
     private function clearTodo($opt)
     {
         $this->clearUserData();
-        return new Response('clear');
+        return (new Response)->code('clear');
     }
 
     private function delTodo($opt)
@@ -44,13 +44,13 @@ class Todo extends \Hrgruri\Ricca\Command
                     unset($this->user_data[$i-1]);
                     $this->user_data = array_values($this->user_data);
                     $this->updateUserData();
-                    $result = new Response('del');
+                    $result = (new Response)->code('del');
                     break;
                 }
                 $i++;
             }
         }
-        return is_null($result)? new Response('undel'): $result;
+        return is_null($result)? (new Response)->code('undel') : $result;
     }
 
     private function deleteTodo($opt)
@@ -69,7 +69,7 @@ class Todo extends \Hrgruri\Ricca\Command
                 $i++;
             }
         } else {
-            return new Response('empty');
+            return (new Response)->code('empty');
         }
         return $result;
     }

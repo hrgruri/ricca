@@ -8,9 +8,9 @@ abstract class Command
     protected $user_data;
 
     /**
-    *   @param  string $opt: message
+    *   @param  string $opt: command option
     *   @param  stdClass | string $key
-    *   @return null | string | \Hrgruri\Ricca\Response getenv("HOME")."/.ricca"
+    *   @return null | string | \Hrgruri\Ricca\Response
     */
     abstract public function run($opt, $key);
 

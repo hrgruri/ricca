@@ -1,8 +1,8 @@
 {
-    "system_start":[
+    "ricca_start":[
         "start."
     ],
-    "system_stop":[
+    "ricca_stop":[
         "stop."
     ],
     "quit_interactive":[

@@ -9,7 +9,8 @@ use \Hrgruri\Ricca\Exception\{CommandException, CronException};
 
 class Ricca
 {
-    const   SPECIAL_COMMAND = ['start', 'stop', 'quit', 'exit'];
+    const   SPECIAL_COMMAND = ['quit'];
+    const   RICCA_COMMAND   = ['start', 'stop', 'exit'];
     private $slack;
     private $token;
     private $root;
@@ -81,14 +82,22 @@ class Ricca
             $text       = mb_convert_kana($data['text'], 'as');
             if (is_string($tmp = $this->botResponse($text))) {
                 $response = (new Response)->message($tmp);
-            } elseif (in_array($text, self::SPECIAL_COMMAND)) {
-                $command    = 'system';
+            } elseif (in_array($text, self::SPECIAL_COMMAND) && $this->active_flag === true) {
+                $this->interactive_flag     = false;
                 $response   = $this->{$text}();
+                $command    = 'ricca';
+            } elseif (preg_match('/^ricca\s([a-z]*)(|\s\S*)$/i', $text, $matched) === 1) {
+                $tmp_command = mb_strtolower($matched[1]);
+                if (in_array($tmp_command,self::RICCA_COMMAND)){
+                    $this->interactive_flag     = false;
+                    $response   = $this->{$tmp_command}(trim($matched[2]));
+                    $command    = 'ricca';
+                }
             } elseif ($this->interactive_flag === true && $this->active_flag === true) {
                 $command    = $this->interactive_command;
                 $response   = $this->runCommand($command, $text);
             } elseif (preg_match('/^(\S*)(\s.*|)/', $text, $matched) === 1 && $this->active_flag === true) {
-                $command = mb_strtolower($matched[1]);
+                $command    = mb_strtolower($matched[1]);
                 $response   = $this->runCommand($command, trim($matched[2]));
             }
 
@@ -107,7 +116,7 @@ class Ricca
                 $result = true;
             }
         } catch (RiccaException $e) {
-            $this->response('system', $e->code, $channel);
+            $this->response('ricca', $e->code, $channel);
         } catch (CommandException $e){
             $this->slack->postMsg($e->getDetail());
         } catch (\Exception $e) {
@@ -225,16 +234,16 @@ class Ricca
         return $result;
     }
 
-    private function start()
+    private function start(string $text)
     {
         $this->active_flag = true;
-        return (new Response)->code('system_start');
+        return (new Response)->code('ricca_start');
     }
 
-    private function stop()
+    private function stop(string $text)
     {
         $this->active_flag = false;
-        return (new Response)->code('system_start');
+        return (new Response)->code('ricca_stop');
     }
 
     /**
@@ -247,7 +256,7 @@ class Ricca
         return (new Response)->code('quit_interactive');
     }
 
-    private function exit()
+    private function exit(string $text)
     {
         exit();
     }

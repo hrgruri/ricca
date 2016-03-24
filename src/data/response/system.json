@@ -1,0 +1,23 @@
+{
+    "system_start":[
+        "start."
+    ],
+    "system_stop":[
+        "stop."
+    ],
+    "quit_interactive":[
+        "quit interactive mode."
+    ],
+    "command_not_found":[
+        "not found command"
+    ],
+    "check":[
+        "check 1",
+        "check 2",
+        "check 3"
+    ],
+    "broken_json":[
+        "json file is broken"
+    ],
+    "broken_preg_pattern":["Warning: preg_match"]
+}

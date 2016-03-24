@@ -5,11 +5,9 @@ If you send a specific message, Ricca(Bot) will do action instead of you.
 ### Config
 config/allow.jsno
 ```json
-{
-    "slack":[
-        "hrgruri"
-    ]
-}
+[
+    "USER_NAME"
+]
 ```
 config/keys.json
 ```json
@@ -22,6 +20,19 @@ config/keys.json
         "oauth_token_secret":"OAUTH_TOKEN_SECRET"
     }
 }
+```
+
+config/bot.json
+```json
+[
+    {
+        "id": "1",
+        "pattern" :"/^hi$/",
+        "response":[
+            "Hi!", ":)"
+        ]
+    }
+]
 ```
 ## Usage
 ```php

@@ -5,10 +5,10 @@ use Abraham\TwitterOAuth\TwitterOAuth;
 
 class Tw extends \Hrgruri\Ricca\Command
 {
-    public function run($opt, $key)
+    public function run($text, $key)
     {
         $result = null;
-        $text = mb_convert_kana($opt, 'as');
+        $text = mb_convert_kana($text, 'as');
         $len = mb_strlen($text);
         if ($len > 0 && $len <= 140 && isset($key['twitter'])) {
             $connection = new TwitterOAuth(

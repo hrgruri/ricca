@@ -5,8 +5,8 @@ use \Hrgruri\Ricca\Exception\CommandException;
 
 class Test extends \Hrgruri\Ricca\Command
 {
-    public function run($opt, $key)
+    public function run($text, $key)
     {
-        return new \Hrgruri\Ricca\Response($opt);
+        return new \Hrgruri\Ricca\Response($text);
     }
 }

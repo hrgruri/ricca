@@ -8,19 +8,19 @@ abstract class Command
     protected $user_data;
 
     /**
-    *   @param  string $opt: command option
+    *   @param  string $text
     *   @param  stdClass | string $key
     *   @return null | string | \Hrgruri\Ricca\Response
     */
-    abstract public function run($opt, $key);
+    abstract public function run($text, $key);
 
     public function __construct($file)
     {
         $dir        = dirname(__FILE__).'/data';
         $this->file = $file;
-        $this->data         = (file_exists("{$dir}/command/{$file}") ? json_decode(file_get_contents("{$dir}/command/{$file}")) : null);
-        $this->user_data    = (file_exists(getenv("HOME")."/.ricca/data/{$this->file}") ?
-            json_decode(file_get_contents(getenv("HOME")."/.ricca/data/{$this->file}")) : null);
+        $this->data         = file_exists("{$dir}/command/{$file}") ? json_decode(file_get_contents("{$dir}/command/{$file}")) : null;
+        $this->user_data    = file_exists(getenv("HOME")."/.ricca/data/{$this->file}") ?
+            json_decode(file_get_contents(getenv("HOME")."/.ricca/data/{$this->file}")) : null;
     }
 
     protected function updateUserData()

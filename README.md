@@ -1,2 +1,1 @@
-# ricca
-Slack Bot
+# Ricca is Slack Bot

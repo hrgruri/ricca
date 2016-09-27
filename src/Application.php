@@ -74,6 +74,10 @@ class Application
             }
         });
 
+        if (!is_dir("{$this->path}/storage")) {
+            mkdir("{$this->path}/storage");
+        }
+
         $this->add(new Command\Pid());
     }
 
@@ -85,15 +89,22 @@ class Application
                 && isset($data['text'])
                 && preg_match('/^(\S*)(\s.*|)/', $data['text'], $matched) === 1
             ) {
-                $command = mb_strtolower($matched[1]);
-                if (!isset($this->commands[$command])) {
+                $name    = mb_strtolower($matched[1]);
+                $storage = null;
+                if (!isset($this->commands[$name])) {
                     return;
                 }
-
-                $response = $this->commands[$command]->execute(
-                    trim(mb_substr($data['text'], strlen($command)))
+                if (file_exists("{$this->path}/storage/{$name}.json")) {
+                    $storage = json_decode(file_get_contents("{$this->path}/storage/{$name}.json"));
+                }
+                $response = $this->commands[$name]->execute(
+                    new Request(trim(mb_substr($data['text'], strlen($name))), $storage)
                 );
-                $this->sendMsg($response, $this->commands[$command]->getChannel());
+                if (is_string($response)) {
+                    $this->sendMsg($response, $this->commands[$name]->getChannel());
+                } elseif ($response instanceof Response) {
+                    $this->processResponse($name, $response);
+                }
             }
         });
         $this->loop->run();
@@ -112,6 +123,20 @@ class Application
         }
         $this->commands[$command]->setChannel($channel);
         return true;
+    }
+
+    /**
+     * set all Command channel
+     * @param  string $channel
+     * @return bool
+     */
+    public function channelAll(string $channel) : bool
+    {
+        $result = true;
+        foreach ($this->commands as $key => $command) {
+            $result &= $this->channel($command->getName(), $channel);
+        }
+        return $result;
     }
 
     /**
@@ -172,5 +197,31 @@ class Application
     private function isAllow($id)
     {
         return ($this->isAdmin($id) || in_array($id, $this->allows));
+    }
+
+    /**
+     * save command data
+     * @param  string $command command name
+     * @param  mixed  $data
+     * @return int
+     */
+    private function save(string $name, $data) : int
+    {
+        return file_put_contents("{$this->path}/storage/{$name}.json", json_encode($data));
+    }
+
+    /**
+     * read command data
+     * @param  string $name command name
+     * @return mixed
+     */
+    private function read(string $name)
+    {
+        return json_decode(file_get_contents("{$this->path}/storage/{$name}.json"));
+    }
+
+    private function processResponse(string $name, Response $res)
+    {
+        $this->save($name, $res->getData());
     }
 }

@@ -9,7 +9,7 @@ class Pid extends \Hrgruri\Ricca\Command
             ->setChannel('general');
     }
 
-    public function execute($text)
+    public function execute(\Hrgruri\Ricca\Request $req)
     {
         return (string)getmypid();
     }

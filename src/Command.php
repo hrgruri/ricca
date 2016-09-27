@@ -7,7 +7,13 @@ abstract class Command
     private $channel;
 
     abstract public function configure();
-    abstract public function execute($text);
+
+    /**
+     * execute command
+     * @param  Hrgruri\Ricca\Request $request
+     * @return Hrgruri\Ricca\Response | string
+     */
+    abstract public function execute(\Hrgruri\Ricca\Request $request);
 
     final public function __construct()
     {

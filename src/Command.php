@@ -1,19 +1,22 @@
 <?php
 namespace Hrgruri\Ricca;
 
+use Hrgruri\Ricca\Request;
+use Hrgruri\Ricca\Response;
+
 abstract class Command
 {
     private $name;
     private $channel;
 
     abstract public function configure();
-
+    
     /**
-     * execute command
-     * @param  Hrgruri\Ricca\Request $request
+     * @param  Hrgruri\Ricca\Request    $request
+     * @param  Hrgruri\Ricca\Response   $response
      * @return Hrgruri\Ricca\Response | string
      */
-    abstract public function execute(\Hrgruri\Ricca\Request $request);
+    abstract public function execute(Request $request, Response $response);
 
     final public function __construct()
     {

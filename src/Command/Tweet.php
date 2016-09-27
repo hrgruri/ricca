@@ -1,16 +1,16 @@
 <?php
 namespace Hrgruri\Ricca\Command;
 
-class Pid extends \Hrgruri\Ricca\Command
+class Tweet extends \Hrgruri\Ricca\Command
 {
     public function configure()
     {
-        $this->setName('pid')
+        $this->setName('tw')
             ->setChannel('general');
     }
 
     public function execute(\Hrgruri\Ricca\Request $req, \Hrgruri\Ricca\Response $res)
     {
-        return (string)getmypid();
+        return $res->withTweet($req->getText())->withText('tweeted');
     }
 }

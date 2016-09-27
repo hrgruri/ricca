@@ -11,6 +11,7 @@ class Application
     private $allows;
     private $admins;
     private $channel;
+    private static $conn; // Twitter connection
 
     /**
      *
@@ -28,6 +29,7 @@ class Application
         $this->client = new \Slack\RealTimeClient($this->loop);
         $this->client->setToken($this->keychain->get('slack'));
         $this->init();
+        $this->channel = $channel ?? 'general';
     }
 
     private function init()
@@ -89,21 +91,23 @@ class Application
                 && isset($data['text'])
                 && preg_match('/^(\S*)(\s.*|)/', $data['text'], $matched) === 1
             ) {
-                $name    = mb_strtolower($matched[1]);
                 $storage = null;
+                $name    = mb_strtolower($matched[1]);
                 if (!isset($this->commands[$name])) {
                     return;
                 }
+                $command = $this->commands[$name];
                 if (file_exists("{$this->path}/storage/{$name}.json")) {
                     $storage = json_decode(file_get_contents("{$this->path}/storage/{$name}.json"));
                 }
-                $response = $this->commands[$name]->execute(
-                    new Request(trim(mb_substr($data['text'], strlen($name))), $storage)
+                $response = $command->execute(
+                    new Request(trim(mb_substr($data['text'], strlen($name))), $storage),
+                    new Response
                 );
                 if (is_string($response)) {
-                    $this->sendMsg($response, $this->commands[$name]->getChannel());
+                    $this->sendMsg($response, $command->getChannel());
                 } elseif ($response instanceof Response) {
-                    $this->processResponse($name, $response);
+                    $this->processResponse($command, $response);
                 }
             }
         });
@@ -220,8 +224,28 @@ class Application
         return json_decode(file_get_contents("{$this->path}/storage/{$name}.json"));
     }
 
-    private function processResponse(string $name, Response $res)
+    private function processResponse(Command $command, Response $res)
     {
-        $this->save($name, $res->getData());
+        $this->save($command->getName(), $res->getData());
+        if (!is_null($res->getText())) {
+            $this->sendMsg($res->getText(), $command->getChannel() ?? 'general');
+        }
+        if (is_string($res->getTweet())) {
+            $this->tweet($res->getTweet());
+        }
+    }
+
+    private function tweet(string $text)
+    {
+        if (!isset(self::$conn)) {
+            $key = $this->keychain->get('twitter');
+            self::$conn = new \Abraham\TwitterOAuth\TwitterOAuth(
+                $key->consumer_key       ?? '',
+                $key->consumer_secret    ?? '',
+                $key->oauth_token        ?? '',
+                $key->oauth_token_secret ?? ''
+            );
+        }
+        self::$conn->post('statuses/update', ['status' => $text]);
     }
 }

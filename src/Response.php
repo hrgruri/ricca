@@ -5,12 +5,7 @@ class Response
 {
     private $text;
     private $data;
-
-    public function __construct(string $text = null, $data = null)
-    {
-        $this->text = $text;
-        $this->data = $data;
-    }
+    private $tweet;
 
     public function withText(string $text)
     {
@@ -26,6 +21,13 @@ class Response
         return $clone;
     }
 
+    public function withTweet(string $text)
+    {
+        $clone = clone $this;
+        $clone->tweet = $text;
+        return $clone;
+    }
+
     public function getText()
     {
         return $this->text;
@@ -34,5 +36,10 @@ class Response
     public function getData()
     {
         return $this->data;
+    }
+
+    public function getTweet()
+    {
+        return $this->tweet;
     }
 }

@@ -1,5 +1,9 @@
 <?php
-use Hrgruri\Ricca\Application;
+use Hrgruri\Ricca\{
+    Application,
+    Request,
+    Response
+};
 
 class ApplicationTest extends TestCase
 {
@@ -11,7 +15,7 @@ class ApplicationTest extends TestCase
                 $this->setName('foo');
             }
 
-            public function execute(\Hrgruri\Ricca\Request $req){}
+            public function execute(Request $req, Response $res){}
         };
         $app = $this->app();
         $this->assertTrue($app->add($instance));
@@ -54,13 +58,13 @@ class ApplicationTest extends TestCase
 
     public function testProcessResponse()
     {
-        $app    = $this->app();
-        $faker  = $this->faker();
-        $text   = $faker->text();
-        $name   = $faker->word;
-        $res    = new \Hrgruri\Ricca\Response(null, $text);
-        $this->callMethod($app, 'processResponse', [$name, $res]);
-        $data = $this->callMethod($app, 'read', [$name]);
+        $app     = $this->app();
+        $faker   = $this->faker();
+        $text    = $faker->text();
+        $command = new Hrgruri\Ricca\Command\Pid();
+        $res     = (new \Hrgruri\Ricca\Response)->withData($text);
+        $this->callMethod($app, 'processResponse', [$command, $res]);
+        $data = $this->callMethod($app, 'read', [$command->getName()]);
         $this->assertEquals($text, $data);
     }
 }

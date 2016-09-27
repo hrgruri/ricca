@@ -9,10 +9,10 @@ class Save extends \Hrgruri\Ricca\Command
             ->setChannel('general');
     }
 
-    public function execute(\Hrgruri\Ricca\Request $req)
+    public function execute(\Hrgruri\Ricca\Request $req, \Hrgruri\Ricca\Response $res)
     {
         $data   = $req->getData();
         $data[] = $req->getText();
-        return new \Hrgruri\Ricca\Response('saved', $data);
+        return $res->withText('saved')->withData($data);
     }
 }

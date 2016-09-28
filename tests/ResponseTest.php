@@ -11,9 +11,9 @@ class ResponseTest extends TestCase
         $res    = new Response(null, null);
 
         $new_res = $res->withText($text)->withData($data);
-        $this->assertNull($res->getText());
-        $this->assertNull($res->getData());
-        $this->assertEquals($text, $new_res->getText());
-        $this->assertEquals($data, $new_res->getData());
+        $this->assertNull($res->text);
+        $this->assertNull($res->data);
+        $this->assertEquals($text, $new_res->text);
+        $this->assertEquals($data, $new_res->data);
     }
 }

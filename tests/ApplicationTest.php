@@ -67,4 +67,17 @@ class ApplicationTest extends TestCase
         $data = $this->callMethod($app, 'read', [$command->getName()]);
         $this->assertEquals($text, $data);
     }
+
+    public function testClear()
+    {
+        $app     = $this->app();
+        $text    = $this->faker()->text();
+        $command = new Hrgruri\Ricca\Command\Pid();
+        $res     = (new \Hrgruri\Ricca\Response)->withClear();
+        $this->callMethod($app, 'save', [$command->getName(), $text]);
+        $this->assertTrue(file_exists($this->file('storage/pid.json')));
+        $this->callMethod($app, 'processResponse', [$command, $res]);
+        $this->assertFalse(file_exists($this->file('storage/pid.json')));
+
+    }
 }

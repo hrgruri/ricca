@@ -211,7 +211,10 @@ class Application
      */
     private function save(string $name, $data) : int
     {
-        return file_put_contents("{$this->path}/storage/{$name}.json", json_encode($data));
+        return file_put_contents(
+            "{$this->path}/storage/{$name}.json",
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
     }
 
     /**
@@ -226,12 +229,27 @@ class Application
 
     private function processResponse(Command $command, Response $res)
     {
-        $this->save($command->getName(), $res->getData());
-        if (!is_null($res->getText())) {
-            $this->sendMsg($res->getText(), $command->getChannel() ?? 'general');
+        // process withClear
+        if (!is_null($res->clear)
+            && $res->clear === true
+            && file_exists("{$this->path}/storage/{$command->getName()}.json")
+        ) {
+            unlink("{$this->path}/storage/{$command->getName()}.json");
         }
-        if (is_string($res->getTweet())) {
-            $this->tweet($res->getTweet());
+
+        // process withData
+        if (!is_null($res->data)) {
+            $this->save($command->getName(), $res->data);
+        }
+
+        // process withText
+        if (!is_null($res->text)) {
+            $this->sendMsg($res->text, $command->getChannel() ?? 'general');
+        }
+
+        // process withTweet
+        if (is_string($res->tweet)) {
+            $this->tweet($res->tweet);
         }
     }
 

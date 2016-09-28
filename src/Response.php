@@ -6,6 +6,12 @@ class Response
     private $text;
     private $data;
     private $tweet;
+    private $clear;
+
+    public function __get($name)
+    {
+        return $this->{$name} ?? null;
+    }
 
     public function withText(string $text)
     {
@@ -28,18 +34,10 @@ class Response
         return $clone;
     }
 
-    public function getText()
+    public function withClear()
     {
-        return $this->text;
-    }
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    public function getTweet()
-    {
-        return $this->tweet;
+        $clone = clone $this;
+        $clone->clear = true;
+        return $clone;
     }
 }

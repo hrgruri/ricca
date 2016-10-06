@@ -8,16 +8,15 @@ use org\bovigo\vfs\{
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-    protected $path = __DIR__ . '/../data';
     protected $root;
 
     public function setUp()
     {
         vfsStreamWrapper::register();
-        vfsStreamWrapper::setRoot(new vfsStreamDirectory('ricca'));
-        $this->root = vfsStream::url('ricca');
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('data'));
+        $this->root = vfsStream::url('data');
         if (!file_exists($this->file('key.json'))) {
-            file_put_contents($this->file('key.json'), json_encode(["slack" => ""]));
+            file_put_contents($this->file('key.json'), json_encode(['slack' => $this->faker()->text(16)]));
         }
     }
 

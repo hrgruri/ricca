@@ -1,4 +1,8 @@
-# Ricca is Slack Bot
+# Ricca
+
+[![Build Status](https://travis-ci.org/hrgruri/ricca.svg?branch=master)](https://travis-ci.org/hrgruri/ricca)
+
+Ricca is Slack Bot
 
 ## Installation
 

@@ -87,7 +87,7 @@ class Application
     {
         $this->client->on('message', function ($data) {
             if ($this->bot_id !== $data['user']
-                && $this->isAllow($data['user'])
+                && $this->isAllow($data['user'] ?? '')
                 && isset($data['text'])
                 && preg_match('/^(\S*)(\s.*|)/', $data['text'], $matched) === 1
             ) {
@@ -198,7 +198,7 @@ class Application
      * @param  string $id
      * @return bool
      */
-    private function isAllow($id)
+    private function isAllow(string $id) : bool
     {
         return ($this->isAdmin($id) || in_array($id, $this->allows));
     }

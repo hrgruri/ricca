@@ -12,6 +12,11 @@ class Request
         $this->data = $data;
     }
 
+    public function __get(string $name)
+    {
+        return $this->{$name} ?? null;
+    }
+
     public function getText() : string
     {
         return $this->text;

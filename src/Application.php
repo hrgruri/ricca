@@ -5,7 +5,6 @@ class Application
     private $path;
     private $commands;
     private $keychain;
-    private $slack;
     private $loop;
     private $bot_id;
     private $allows;
@@ -17,22 +16,26 @@ class Application
      *
      * @param string $path
      * @param string $channel
+     * @param bool   $notification
      */
-    public function __construct(string $path, string $channel = null)
+    public function __construct(string $path, string $channel = null, bool $notification = null)
     {
         $this->path     = rtrim($path, '/');
-        $this->channel  = $channel;
+        $this->channel  = $channel ?? 'general';
         $this->commands = [];
         $this->keychain = KeyChain::load("{$this->path}/key.json");
         $this->add(new \Hrgruri\Ricca\Command\Pid());
         $this->loop   = \React\EventLoop\Factory::create();
         $this->client = new \Slack\RealTimeClient($this->loop);
         $this->client->setToken($this->keychain->get('slack'));
-        $this->init();
-        $this->channel = $channel ?? 'general';
+        $this->init($notification ?? true);
     }
 
-    private function init()
+    /**
+     * initialization
+     * @param  bool   $notification
+     */
+    private function init(bool $notification)
     {
         $file = "{$this->path}/user.json";
         if (!file_exists($file)) {
@@ -48,7 +51,7 @@ class Application
             print "user.json is broken\n";
             exit(1);
         }
-        $this->client->connect()->then(function () use ($data) {
+        $this->client->connect()->then(function () use ($data, $notification) {
             $this->admins   = [];
             $this->allows   = [];
 
@@ -71,8 +74,8 @@ class Application
                 $this->bot_id = $user->getId();
             });
 
-            if (isset($this->channel)) {
-                $this->sendMsg('Ricca is online', $this->channel);
+            if ($notification === true) {
+                $this->sendMsg('Ricca is online');
             }
         });
 
@@ -105,42 +108,13 @@ class Application
                     new Response
                 );
                 if (is_string($response)) {
-                    $this->sendMsg($response, $command->getChannel());
+                    $this->sendMsg($response);
                 } elseif ($response instanceof Response) {
                     $this->processResponse($command, $response);
                 }
             }
         });
         $this->loop->run();
-    }
-
-    /**
-     * set Command channel
-     * @param  string $command command name
-     * @param  string $channel channel name
-     * @return bool
-     */
-    public function channel(string $command, string $channel) : bool
-    {
-        if (!isset($this->commands[$command])) {
-            return false;
-        }
-        $this->commands[$command]->setChannel($channel);
-        return true;
-    }
-
-    /**
-     * set all Command channel
-     * @param  string $channel
-     * @return bool
-     */
-    public function channelAll(string $channel) : bool
-    {
-        $result = true;
-        foreach ($this->commands as $key => $command) {
-            $result &= $this->channel($command->getName(), $channel);
-        }
-        return $result;
     }
 
     /**
@@ -174,11 +148,10 @@ class Application
     /**
      * send message to Slack
      * @param  string  $text message
-     * @param  string  $name channel name
      */
-    private function sendMsg(string $text, string $name)
+    private function sendMsg(string $text)
     {
-        $this->client->getChannelByName($name)->then(function ($channel) use ($text) {
+        $this->client->getChannelByName($this->channel)->then(function ($channel) use ($text) {
             $this->client->send($text, $channel);
         });
     }
@@ -244,7 +217,7 @@ class Application
 
         // process withText
         if (!is_null($res->text)) {
-            $this->sendMsg($res->text, $command->getChannel() ?? 'general');
+            $this->sendMsg($res->text);
         }
 
         // process withTweet

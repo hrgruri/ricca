@@ -13,15 +13,4 @@ class CommandTest extends TestCase
         $result   = $this->callMethod($instance, 'getName');
         $this->assertEquals($word, $result);
     }
-
-    public function testChannel()
-    {
-        $instance = new Pid();
-        $faker    = $this->faker();
-        $word     = $faker->word;
-        $instance = $this->callMethod($instance, 'setChannel', [$word]);
-        $this->assertInstanceOf(Pid::class, $instance);
-        $result   = $this->callMethod($instance, 'getChannel');
-        $this->assertEquals($word, $result);
-    }
 }

@@ -31,19 +31,6 @@ class ApplicationTest extends TestCase
         $this->assertEquals('Hrgruri\Ricca\Command\Pid', $list['pid']);
     }
 
-    public function testChannel()
-    {
-        $app = $this->app();
-        $this->assertTrue($app->channel('pid', 'bot_channel'));
-        $this->assertFalse($app->channel('undefined_command', 'bot_channel'));
-    }
-
-    public function testChannelAll()
-    {
-        $app = $this->app();
-        $this->assertTrue($app->channelAll('bot_channel'));
-    }
-
     public function testSave()
     {
         $app    = $this->app();

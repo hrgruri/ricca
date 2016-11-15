@@ -5,8 +5,7 @@ class Tweet extends \Hrgruri\Ricca\Command
 {
     public function configure()
     {
-        $this->setName('tw')
-            ->setChannel('general');
+        $this->setName('tw');
     }
 
     public function execute(\Hrgruri\Ricca\Request $req, \Hrgruri\Ricca\Response $res)

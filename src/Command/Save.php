@@ -5,8 +5,7 @@ class Save extends \Hrgruri\Ricca\Command
 {
     public function configure()
     {
-        $this->setName('save')
-            ->setChannel('general');
+        $this->setName('save');
     }
 
     public function execute(\Hrgruri\Ricca\Request $req, \Hrgruri\Ricca\Response $res)
